@@ -160,12 +160,6 @@ create_database()
 # IMAGE LOADING
 # ==========================================
 
-
-
-# ==========================================
-# IMAGE LOADING
-# ==========================================
-
 def image_to_base64(path):
     if path.exists():
         return base64.b64encode(
