@@ -459,7 +459,7 @@ if st.session_state.page == "home":
         url('data:image/jpeg;base64,{building_base64}');">
             <div class="hero-overlay">
                 
-        
+        </div>
         """, unsafe_allow_html=True)
 
     st.markdown("""
@@ -495,7 +495,7 @@ if st.session_state.page == "home":
 # ==========================================
 # PERSONAL INFORMATION PAGE
 # ==========================================
-# ================= PERSONAL INFORMATION PAGE =================
+
 
 elif st.session_state.page == "personal":
 
