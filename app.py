@@ -7,6 +7,11 @@ from pathlib import Path
 from datetime import date
 from PIL import Image, ImageDraw
 from io import BytesIO
+import gspread
+import uuid
+from google.oauth2.service_account import Credentials
+from datetime import datetime
+from zoneinfo import ZoneInfo
 # ==========================================
 # PAGE CONFIGURATION
 # ==========================================
@@ -155,7 +160,31 @@ def create_database():
         """)
 
 create_database()
+def get_google_sheet():
 
+    credentials_info = json.loads(
+        st.secrets["gcp_service_account"]
+    )
+
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
+    credentials = Credentials.from_service_account_info(
+        credentials_info,
+        scopes=scopes
+    )
+
+    client = gspread.authorize(credentials)
+
+    spreadsheet = client.open_by_key(
+        "1Zmt_kluAlR_JTBUvJ3XWsiVntWv_iVZUzuANv8CPJf4"
+    )
+
+    worksheet = spreadsheet.sheet1
+
+    return worksheet
 # ==========================================
 # IMAGE LOADING
 # ==========================================
