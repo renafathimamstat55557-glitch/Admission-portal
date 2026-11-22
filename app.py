@@ -997,35 +997,108 @@ elif st.session_state.page == "summary":
 
             else:
 
-                # SAVE APPLICATION INTO SQLITE DATABASE
-                with sqlite3.connect(DB_FILE) as conn:
+                # SAVE APPLICATION ID
+      
+# SAVE APPLICATION TO GOOGLE SHEETS
 
-                    cursor = conn.cursor()
+try:
+    application_id = "BCM" + uuid.uuid4().hex[:8].upper()
 
-                    cursor.execute("""
-                        INSERT INTO applications (
-                            student_name,
-                            email,
-                            phone,
-                            category,
-                            application_data
-                        )
-                        VALUES (?, ?, ?, ?, ?)
-                    """, (
-                        p["name"],
-                        p["email"],
-                        p["phone"],
-                        a["category"],
-                        json.dumps({
-                            "personal": {
-                                **p,
-                                "dob": str(p["dob"])
-                            },
-                            "academic": a
-                        })
-                    ))
+    personal = p
+    academic = a
 
-                    application_id = cursor.lastrowid
+    category_label = (
+        "Undergraduate (UG)"
+        if academic["category"] == "UG"
+        else "Postgraduate (PG)"
+    )
+
+    preferences = academic.get("preferences", [])
+    preferences = preferences + [""] * (5 - len(preferences))
+
+    if academic["category"] == "UG":
+        board = academic.get("board", "")
+        tenth_percentage = academic.get("10th_percentage", "")
+        plus_one_percentage = academic.get("plus_one_percentage", "")
+        pg_stream = ""
+        twelfth_percentage = ""
+        degree_category = ""
+        degree_course = ""
+
+    else:
+        board = ""
+        tenth_percentage = ""
+        plus_one_percentage = ""
+        pg_stream = academic.get("stream", "")
+        twelfth_percentage = academic.get("12th_percentage", "")
+        degree_category = academic.get("degree_category", "")
+        degree_course = academic.get("degree_course", "")
+
+    submitted_at = datetime.now(
+        ZoneInfo("Asia/Kolkata")
+    ).strftime("%d-%m-%Y %I:%M %p")
+
+    row = [
+        application_id,
+        personal.get("name", ""),
+        str(personal.get("dob", "")),
+        personal.get("gender", ""),
+        personal.get("address", ""),
+        personal.get("phone", ""),
+        personal.get("email", ""),
+        personal.get("guardian", ""),
+        personal.get("guardian_phone", ""),
+        category_label,
+        board,
+        tenth_percentage,
+        plus_one_percentage,
+        pg_stream,
+        twelfth_percentage,
+        degree_category,
+        degree_course,
+        *preferences[:5],
+        submitted_at,
+        "Submitted"
+    ]
+
+    worksheet = get_google_sheet()
+
+    worksheet.append_row(
+        row,
+        value_input_option="USER_ENTERED"
+    )
+
+    # Also keep the local database copy
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute("""
+            INSERT INTO applications (
+                student_name,
+                email,
+                phone,
+                category,
+                application_data
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            personal["name"],
+            personal["email"],
+            personal["phone"],
+            academic["category"],
+            json.dumps({
+                "personal": {
+                    **personal,
+                    "dob": str(personal["dob"])
+                },
+                "academic": academic
+            })
+        ))
+
+    st.session_state.application_id = application_id
+
+except Exception as e:
+    st.error(f"Unable to save application to Google Sheets: {e}")
+    st.stop()
+
 
                 # SAVE APPLICATION ID
                 st.session_state.application_id = application_id
@@ -1079,7 +1152,7 @@ if st.session_state.page == "success":
 
             st.info(
                 f"**Application ID:** "
-                f"BCM{st.session_state.application_id:05d}"
+                f"{st.session_state.application_id}"
             )
 
             st.markdown(
