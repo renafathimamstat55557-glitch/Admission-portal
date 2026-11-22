@@ -1099,13 +1099,13 @@ elif st.session_state.page == "summary":
                             st.stop()
                         
 
-                # SAVE APPLICATION ID
-                st.session_state.application_id = application_id
-
-                # MOVE TO SUCCESS PAGE
-                st.session_state.page = "success"
-
-                st.rerun()
+                        # SAVE APPLICATION ID
+                        st.session_state.application_id = application_id
+        
+                        # MOVE TO SUCCESS PAGE
+                        st.session_state.page = "success"
+        
+                        st.rerun()
 
 # ==========================================
 # SUCCESS PAGE
