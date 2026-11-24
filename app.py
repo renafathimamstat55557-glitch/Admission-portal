@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 import sqlite3
 import json
 import re
@@ -7,11 +8,6 @@ from pathlib import Path
 from datetime import date
 from PIL import Image, ImageDraw
 from io import BytesIO
-import gspread
-import uuid
-from google.oauth2.service_account import Credentials
-from datetime import datetime
-from zoneinfo import ZoneInfo
 # ==========================================
 # PAGE CONFIGURATION
 # ==========================================
@@ -30,7 +26,6 @@ st.set_page_config(
 BASE_DIR = Path(__file__).parent
 
 LOGO_FILE = BASE_DIR / "bcm_logo.jpeg.jpeg"
-COLLEGE_FILE = BASE_DIR / "bcm_campus.jpg.jpeg"
 DB_FILE = BASE_DIR / "bcm_registrations.db"
 
 # ==========================================
@@ -70,7 +65,8 @@ BOARDS = [
     "Kerala State Board (SSLC)",
     "CBSE",
     "CISCE (ICSE)",
-    "Tamil Nadu State Board (SSLC)"
+    "Tamil Nadu State Board (SSLC)",
+    "Others"
 ]
 
 PERCENTAGES = [
@@ -84,73 +80,33 @@ PERCENTAGES = [
 ]
 
 STREAMS = [
-    "Science (Biology)",
-    "Science (Mathematics)",
-    "Science (Computer Science)",
-    "Science (Bio-Maths)",
+    "Science",
     "Commerce",
-    "Commerce (Computer Application)",
     "Humanities / Arts",
     "Vocational / VHSE",
+    "Technical",
     "Other"
 ]
 
-DEGREE_COURSES = {
-    "Science": [
-        "B.Sc. Mathematics",
-        "B.Sc. Statistics",
-        "B.Sc. Physics",
-        "B.Sc. Chemistry",
-        "B.Sc. Botany",
-        "B.Sc. Zoology",
-        "B.Sc. Computer Science",
-        "B.Sc. Psychology",
-        "B.Sc. Biotechnology",
-        "B.Sc. Microbiology",
-        "B.Sc. Electronics",
-        "B.Sc. Data Science"
-    ],
 
-    "Arts / Humanities": [
-        "B.A. English",
-        "B.A. Malayalam",
-        "B.A. History",
-        "B.A. Economics",
-        "B.A. Political Science",
-        "B.A. Sociology",
-        "B.A. Psychology",
-        "B.A. Journalism",
-        "B.A. Philosophy"
-    ],
 
-    "Commerce / Management": [
-        "B.Com. Finance",
-        "B.Com. Computer Applications",
-        "B.Com. Cooperation",
-        "B.Com. Taxation",
-        "B.Com. Marketing",
-        "BBA",
-        "BCA",
-        "BSW (Social Work)"
-    ],
-
-    "Other": [
-        "B.Voc.",
-        "Integrated Degree",
-        "Other Bachelor's Degree"
-    ]
-}
 
 # ==========================================
 # DATABASE
 # ==========================================
 
 def create_database():
+
     with sqlite3.connect(DB_FILE) as conn:
-        conn.execute("""
+
+        cur = conn.cursor()
+
+        # Create table if it does not exist
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS applications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_name TEXT,
+                applicant_name TEXT,
                 email TEXT,
                 phone TEXT,
                 category TEXT,
@@ -159,42 +115,48 @@ def create_database():
             )
         """)
 
+        # Read existing database columns
+        cur.execute("PRAGMA table_info(applications)")
+
+        existing_columns = {
+            row[1] for row in cur.fetchall()
+        }
+
+        # Columns required by the application
+        required_columns = {
+            "student_name": "TEXT",
+            "applicant_name": "TEXT",
+            "email": "TEXT",
+            "phone": "TEXT",
+            "category": "TEXT",
+            "application_data": "TEXT",
+            "submitted_at": "TIMESTAMP"
+        }
+
+        # Add only columns that are missing
+        for column, dtype in required_columns.items():
+
+            if column not in existing_columns:
+
+                try:
+                    cur.execute(
+                        f"ALTER TABLE applications ADD COLUMN {column} {dtype}"
+                    )
+
+                except sqlite3.OperationalError as e:
+                    if "duplicate column name" not in str(e).lower():
+                        raise
+
+        conn.commit()
+
+
 create_database()
-def get_google_sheet():
 
-    credentials_info = json.loads(
-        st.secrets["gcp_service_account"]
-    )
 
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
 
-    credentials = Credentials.from_service_account_info(
-        credentials_info,
-        scopes=scopes
-    )
-
-    client = gspread.authorize(credentials)
-
-    spreadsheet = client.open_by_key(
-        "1Zmt_kluAlR_JTBUvJ3XWsiVntWv_iVZUzuANv8CPJf4"
-    )
-
-    worksheet = spreadsheet.sheet1
-
-    return worksheet
 # ==========================================
 # IMAGE LOADING
 # ==========================================
-
-def image_to_base64(path):
-    if path.exists():
-        return base64.b64encode(
-            path.read_bytes()
-        ).decode("utf-8")
-    return ""
 
 
 def load_logo(path):
@@ -223,7 +185,6 @@ def load_logo(path):
 
 
 logo_image = load_logo(LOGO_FILE)
-building_base64 = image_to_base64(COLLEGE_FILE)
 
 
 # ==========================================
@@ -448,26 +409,10 @@ with col2:
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        '<p class="college-subtitle">'
-        'Online Student Registration Portal'
-        '</p>',
-        unsafe_allow_html=True
-    )
-
+    
 st.divider()
 
 
-# ==========================================
-# HOME NAVIGATION
-# ==========================================
-
-left, right = st.columns([6, 1])
-
-with right:
-    if st.button("⌂ Home", use_container_width=True):
-        st.session_state.page = "home"
-        st.rerun()
 
 # ==========================================
 # HOME PAGE
@@ -475,15 +420,7 @@ with right:
 
 if st.session_state.page == "home":
 
-    if building_base64:
-        st.markdown(f"""
-        <div class="hero-banner"
-        style="background-image:
-        url('data:image/jpeg;base64,{building_base64}');">
-            <div class="hero-overlay">
-                
-        </div>
-        """, unsafe_allow_html=True)
+   
 
     st.markdown("""
     <div class="portal-card">
@@ -491,11 +428,11 @@ if st.session_state.page == "home":
              REGISTRATION 2027-28
         </h2>
         <p style="text-align:center;font-size:17px;">
-            Welcome to the B.C.M. College Kottayam
+            Welcome to the B.C.M. College Kottayam (Autonomous)
             student registration portal.
             <br>
-            Apply for Undergraduate and Postgraduate
-            programmes through our registration system.
+            Register for Undergraduate and Postgraduate
+            programmes
         </p>
         <hr>
         <h3 style="text-align:center;">
@@ -515,10 +452,8 @@ if st.session_state.page == "home":
         ):
             st.session_state.page = "personal"
             st.rerun()
-# ==========================================
-# PERSONAL INFORMATION PAGE
-# ==========================================
 
+# ================= PERSONAL INFORMATION PAGE =================
 
 elif st.session_state.page == "personal":
 
@@ -766,84 +701,80 @@ if st.session_state.page == "academic":
 
     else:
 
-        st.markdown("### Postgraduate Admission")
+     st.markdown("### Postgraduate Admission")
 
-        st.selectbox(
-            "12th Standard Stream *",
-            STREAMS,
-            key="pg_stream"
-        )
+     st.selectbox(
+        "12th Standard Stream *",
+        STREAMS,
+        key="pg_stream"
+     )
 
-        st.selectbox(
-            "12th Standard Percentage *",
-            PERCENTAGES,
-            key="pg_percentage"
-        )
+     st.selectbox(
+        "12th Standard Percentage *",
+        PERCENTAGES,
+        key="pg_percentage"
+     )
 
-        st.selectbox(
-            "Current Degree Programme *",
-            [
-                "Science",
-                "Arts / Humanities",
-                "Commerce / Management",
-                "Other"
-            ],
-            key="degree_category"
-        )
+     st.selectbox(
+        "Current Degree Programme Category *",
+        [
+            "Science",
+            "Arts / Humanities",
+            "Commerce / Management",
+            "Other"
+         ],
+         key="degree_category"
+     )
 
-        current_category = st.session_state.degree_category
+     current_category = st.session_state.degree_category
 
-        available_degree_courses = DEGREE_COURSES[current_category]
+     st.text_input(
+        "What degree programme are you currently pursuing or have completed? *",
+        key="degree_course",
+        placeholder="Enter your degree programme"
+     )
 
-        current_degree = st.session_state.degree_course
+     st.markdown("### Preferred Master's Degree Courses")
 
-        if current_degree not in ["Select Degree Course"] + available_degree_courses:
-            st.session_state.degree_course = "Select Degree Course"
+     preferences = show_preferences("pg", PG_COURSES)
 
-        st.selectbox(
-            "What degree programme are you currently pursuing or have completed?",
-            ["Select Degree Course"] + available_degree_courses,
-            key="degree_course"
-        )
+    if st.button("Next →", key="pg_next"):
 
-        st.markdown("### Preferred Master's Degree Courses")
+        if not st.session_state.degree_course.strip():
 
-        preferences = show_preferences("pg", PG_COURSES)
+            st.error("Please enter your degree programme.")
 
-        if st.button("Next →", key="pg_next"):
+        elif not preferences:
 
-            if st.session_state.degree_course == "Select Degree Course":
-                st.error("Please select your degree course.")
+            st.error("Please select at least one Master's course.")
 
-            elif not preferences:
-                st.error("Please select at least one Master's course.")
+        else:
 
-            else:
-                st.session_state.academic = {
-                    "category": "PG",
-                    "stream": st.session_state.pg_stream,
-                    "12th_percentage": st.session_state.pg_percentage,
-                    "degree_category": current_category,
-                    "degree_course": st.session_state.degree_course,
-                    "preferences": preferences
-                }
+            st.session_state.academic = {
+                "category": "PG",
+                "stream": st.session_state.pg_stream,
+                "12th_percentage": st.session_state.pg_percentage,
+                "degree_category": current_category,
+                "degree_course": st.session_state.degree_course.strip(),
+                "preferences": preferences
+            }
 
-                st.session_state.page = "summary"
-                st.rerun()
+            st.session_state.page = "summary"
+            st.rerun()
 
-    st.divider()
 
-    if st.button("← Back to Personal Information"):
-        st.session_state.page = "personal"
-        st.rerun()
-
-# ==========================================
-# APPLICATION SUMMARY
-# ==========================================
 # ==========================================
 # APPLICATION SUMMARY PAGE
 # ==========================================
+    # BACK BUTTON - ACADEMIC PAGE ONLY
+    st.divider()
 
+    if st.button(
+        "← Back to Personal Information",
+        use_container_width=True
+    ):
+        st.session_state.page = "personal"
+        st.rerun()
 elif st.session_state.page == "summary":
 
     st.title("📋 Application Summary")
@@ -970,20 +901,8 @@ elif st.session_state.page == "summary":
     # BACK AND SUBMIT BUTTONS
     # --------------------------------------
 
-    back, submit = st.columns(2)
-
-    with back:
-
-        if st.button(
-            "← Back to Academic Information",
-            use_container_width=True
-        ):
-
-            st.session_state.page = "academic"
-            st.rerun()
-
-    with submit:
-
+    submit = st.columns(1)
+    with submit[0]:
         if st.button(
             "✅ SAVE AND SUBMIT",
             use_container_width=True
@@ -997,115 +916,90 @@ elif st.session_state.page == "summary":
 
             else:
 
-                # SAVE APPLICATION ID
-      
-# SAVE APPLICATION TO GOOGLE SHEETS
-                        try:
-                            application_id = "BCM" + uuid.uuid4().hex[:8].upper()
-                        
-                            personal = p
-                            academic = a
-                        
-                            category_label = (
-                                "Undergraduate (UG)"
-                                if academic["category"] == "UG"
-                                else "Postgraduate (PG)"
-                            )
-                        
-                            preferences = academic.get("preferences", [])
-                            preferences = preferences + [""] * (5 - len(preferences))
-                        
-                            if academic["category"] == "UG":
-                                board = academic.get("board", "")
-                                tenth_percentage = academic.get("10th_percentage", "")
-                                plus_one_percentage = academic.get("plus_one_percentage", "")
-                                pg_stream = ""
-                                twelfth_percentage = ""
-                                degree_category = ""
-                                degree_course = ""
-                        
-                            else:
-                                board = ""
-                                tenth_percentage = ""
-                                plus_one_percentage = ""
-                                pg_stream = academic.get("stream", "")
-                                twelfth_percentage = academic.get("12th_percentage", "")
-                                degree_category = academic.get("degree_category", "")
-                                degree_course = academic.get("degree_course", "")
-                        
-                            submitted_at = datetime.now(
-                                ZoneInfo("Asia/Kolkata")
-                            ).strftime("%d-%m-%Y %I:%M %p")
-                        
-                            row = [
-                                application_id,
-                                personal.get("name", ""),
-                                str(personal.get("dob", "")),
-                                personal.get("gender", ""),
-                                personal.get("address", ""),
-                                personal.get("phone", ""),
-                                personal.get("email", ""),
-                                personal.get("guardian", ""),
-                                personal.get("guardian_phone", ""),
-                                category_label,
-                                board,
-                                tenth_percentage,
-                                plus_one_percentage,
-                                pg_stream,
-                                twelfth_percentage,
-                                degree_category,
-                                degree_course,
-                                *preferences[:5],
-                                submitted_at,
-                                "Submitted"
-                            ]
-                        
-                            worksheet = get_google_sheet()
-                        
-                            worksheet.append_row(
-                                row,
-                                value_input_option="USER_ENTERED"
-                            )
-                        
-                            # Also keep the local database copy
-                            with sqlite3.connect(DB_FILE) as conn:
-                                conn.execute("""
-                                    INSERT INTO applications (
-                                        student_name,
-                                        email,
-                                        phone,
-                                        category,
-                                        application_data
-                                    )
-                                    VALUES (?, ?, ?, ?, ?)
-                                """, (
-                                    personal["name"],
-                                    personal["email"],
-                                    personal["phone"],
-                                    academic["category"],
-                                    json.dumps({
-                                        "personal": {
-                                            **personal,
-                                            "dob": str(personal["dob"])
-                                        },
-                                        "academic": academic
-                                    })
-                                ))
-                        
-                            st.session_state.application_id = application_id
-                        
-                        except Exception as e:
-                            st.error(f"Unable to save application to Google Sheets: {e}")
-                            st.stop()
-                        
+                # SAVE APPLICATION INTO SQLITE DATABASE
+                with sqlite3.connect(DB_FILE) as conn:
 
-                        # SAVE APPLICATION ID
-                        st.session_state.application_id = application_id
-        
-                        # MOVE TO SUCCESS PAGE
-                        st.session_state.page = "success"
-        
-                        st.rerun()
+                    cursor = conn.cursor()
+
+                    cursor.execute("""
+                        INSERT INTO applications (
+    student_name,
+    applicant_name,
+    email,
+    phone,
+    category,
+    application_data,
+    submitted_at
+)
+VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                    """, (
+                        p["name"],
+                        p["name"],
+                        p["email"],
+                        p["phone"],
+                        a["category"],
+                        json.dumps({
+                            "personal": {
+                                **p,
+                                "dob": str(p["dob"])
+                            },
+                            "academic": a
+                        })
+                    ))
+
+                    
+                # SAVE APPLICATION TO GOOGLE SHEETS
+
+                p = st.session_state.personal
+                a = st.session_state.academic
+
+                is_ug = a["category"] == "UG"
+
+                payload = {
+                    "name": p.get("name", ""),
+                    "gender": p.get("gender", ""),
+                    "dob": str(p.get("dob", "")),
+                    "address": p.get("address", ""),
+                    "contact": p.get("phone", ""),
+                    "guardian_name": p.get("guardian", ""),
+                    "guardian_phone": p.get("guardian_phone", ""),
+                    "email": p.get("email", ""),
+                    "category": a.get("category", ""),
+                    "tenth_board": a.get("board", ""),
+                    "tenth_percentage": a.get("10th_percentage", ""),
+                    "plus_one_percentage": a.get("plus_one_percentage", ""),
+                    "ug_preferences": a.get("preferences", []) if is_ug else [],
+                    "twelfth_stream": a.get("stream", ""),
+                    "twelfth_percentage": a.get("12th_percentage", ""),
+                    "current_degree": a.get("degree_category", ""),
+                    "degree_details": a.get("degree_course", ""),
+                    "pg_preferences": a.get("preferences", []) if not is_ug else []
+                }
+
+                try:
+                    response = requests.post(
+                        st.secrets["GOOGLE_SCRIPT_URL"],
+                        json=payload,
+                        timeout=15
+                    )
+
+                    response.raise_for_status()
+                    result = response.json()
+
+                    if result.get("status") != "success":
+                        raise Exception("Google Sheets rejected the submission.")
+
+                    st.session_state.sheets_saved = True
+
+                except Exception:
+                    st.session_state.sheets_saved = False
+
+                # MOVE TO SUCCESS PAGE
+                st.session_state.page = "success"
+                st.rerun()
+              
+    
+   
 
 # ==========================================
 # SUCCESS PAGE
@@ -1131,45 +1025,18 @@ if st.session_state.page == "success":
 
             st.markdown(
                 "<h2 style='text-align:center;'>"
-                "Application Submitted Successfully!"
+                "Registration Submitted Successfully!"
                 "</h2>",
                 unsafe_allow_html=True
             )
 
-            st.markdown(
-                "<p style='text-align:center;color:gray;'>"
-                "Your admission application has been received."
-                "</p>",
-                unsafe_allow_html=True
-            )
-
-            st.divider()
-
             
-
-            st.markdown("### Application Details")
-
-            st.info(
-                f"**Application ID:** "
-                f"{st.session_state.application_id}"
-            )
-
-            st.markdown(
-                """
-                **College:** B.C.M. College Kottayam (Autonomous)
-
-                **Status:** Submitted Successfully
-
-                **Next Step:** Please keep your Application ID
-                safe for future reference.
-                """
-            )
-
+           
             st.divider()
 
             st.markdown(
                 "<h4 style='text-align:center;'>"
-                "Thank You for Choosing B.C.M. College!"
+                "Thank You for Choosing B.C.M. College Kottayam (Autonomous)!"
                 "</h4>",
                 unsafe_allow_html=True
             )
@@ -1179,7 +1046,7 @@ if st.session_state.page == "success":
             st.write("")
 
             if st.button(
-                "🏠 Return to Home",
+                "Register another student",
                 use_container_width=True,
                 type="primary"
             ):
@@ -1206,6 +1073,6 @@ st.markdown("""
 <div class="footer-text">
     B.C.M. College Kottayam (Autonomous)
     <br>
-    Online Student Admission Portal
+    Student Registration Portal
 </div>
 """, unsafe_allow_html=True)
