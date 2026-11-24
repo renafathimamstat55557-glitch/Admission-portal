@@ -706,12 +706,12 @@ if st.session_state.page == "academic":
             ],
             key="degree_category"
         )
-
        st.text_input(
-    "What degree programme are you currently pursuing or have completed? *",
-    key="degree_course",
-    placeholder="Enter the degree programme"
-)
+            "What degree programme are you currently pursuing or have completed? *",
+            key="degree_course",
+            placeholder="Enter the degree programme"
+        )
+          
 
         st.markdown("### Preferred Master's Degree Courses")
         preferences = show_preferences("pg", PG_COURSES)
