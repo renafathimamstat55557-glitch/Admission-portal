@@ -714,7 +714,6 @@ if st.session_state.page == "academic":
         )
 
         st.markdown("### Preferred Master's Degree Courses")
-
         preferences = show_preferences("pg", PG_COURSES)
 
     # --------------------------------------
