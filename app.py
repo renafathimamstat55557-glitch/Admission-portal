@@ -213,7 +213,7 @@ DEFAULTS = {
     "pg_stream": STREAMS[0],
     "pg_percentage": PERCENTAGES[0],
     "degree_category": "Science",
-    "degree_course": "Select Degree Course"
+    "degree_course": "Enter the degree programme(Major/Main)"
 }
 
 for key, value in DEFAULTS.items():
