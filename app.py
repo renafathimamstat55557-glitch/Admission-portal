@@ -702,7 +702,7 @@ if st.session_state.page == "academic":
     # --------------------------------------
     # PG FORM
     # --------------------------------------
-
+    
     else:
 
         st.markdown("### Postgraduate Admission")
@@ -729,15 +729,16 @@ if st.session_state.page == "academic":
             ],
             key="degree_category"
         )
+
         st.text_input(
             "What degree programme are you currently pursuing or have completed? *",
             key="degree_course",
-            placeholder="Enter the degree programme(Major/Main)"
+            placeholder="Enter the degree programme (Major/Main)"
         )
-          
 
         st.markdown("### Preferred Master's Degree Courses")
         preferences = show_preferences("pg", PG_COURSES)
+
 
     # --------------------------------------
     # SINGLE NEXT BUTTON FOR UG AND PG
