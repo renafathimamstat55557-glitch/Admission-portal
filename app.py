@@ -333,6 +333,26 @@ h1, h2, h3, h4, p, label {
     color: white !important;
 }
 
+/* ERROR MESSAGE - SAME IN LIGHT AND DARK MODE */
+
+div[data-testid="stAlert"] {
+    background: #FDECEC !important;
+    background-color: #FDECEC !important;
+    border: 1px solid #E9A5A5 !important;
+    border-radius: 10px !important;
+    color: #991B1B !important;
+    color-scheme: light !important;
+}
+
+div[data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {
+    color: #991B1B !important;
+    -webkit-text-fill-color: #991B1B !important;
+}
+
+div[data-testid="stAlert"] svg {
+    color: #991B1B !important;
+}
 .footer-text {
     text-align: center;
     padding: 18px;
