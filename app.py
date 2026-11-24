@@ -213,12 +213,15 @@ DEFAULTS = {
     "pg_stream": STREAMS[0],
     "pg_percentage": PERCENTAGES[0],
     "degree_category": "Science",
-    "degree_course": "Enter the degree programme(Major/Main)"
+    "degree_course": ""
 }
 
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
         st.session_state[key] = value
+# Clear old default value from existing sessions
+if st.session_state.get("degree_course") == "Select Degree Course":
+    st.session_state["degree_course"] = ""
 
 for prefix in ["ug", "pg"]:
     for i in range(1, 6):
