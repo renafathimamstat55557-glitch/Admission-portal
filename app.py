@@ -240,6 +240,7 @@ DEFAULTS = {
 
     "ug_board": BOARDS[0],
     "ug_percentage": PERCENTAGES[0],
+    "ug_stream": STREAMS[0],
     "ug_plus_one": 0.0,
 
     "pg_stream": STREAMS[0],
@@ -716,7 +717,11 @@ if st.session_state.page == "academic":
             PERCENTAGES,
             key="ug_percentage"
         )
-
+        st.selectbox(
+            "Current Stream of Study *",
+            STREAMS,
+            key="ug_stream"
+        )
         st.number_input(
             "Plus One Percentage *",
             min_value=0.0,
@@ -794,10 +799,10 @@ if st.session_state.page == "academic":
                     "category": "UG",
                     "board": st.session_state.ug_board,
                     "10th_percentage": st.session_state.ug_percentage,
+                    "current_stream": st.session_state.ug_stream,
                     "plus_one_percentage": st.session_state.ug_plus_one,
                     "preferences": preferences
                 }
-
                 st.session_state.page = "summary"
                 st.rerun()
 
@@ -880,6 +885,11 @@ elif st.session_state.page == "summary":
 
         st.write(f"**10th Board:** {a.get('board', '')}")
 
+
+        st.write(
+            f"**Current Stream of Study:** "
+            f"{a.get('current_stream', '')}"
+        )
         st.write(
             f"**10th Percentage Range:** "
             f"{a.get('10th_percentage', '')}"
@@ -997,6 +1007,7 @@ elif st.session_state.page == "summary":
                     if academic["category"] == "UG":
                         board = academic.get("board", "")
                         tenth_percentage = academic.get("10th_percentage", "")
+                        Plustwo_stream = academic.get("current_stream", "")
                         plus_one_percentage = academic.get("plus_one_percentage", "")
                         pg_stream = ""
                         twelfth_percentage = ""
@@ -1005,6 +1016,7 @@ elif st.session_state.page == "summary":
                     else:
                         board = ""
                         tenth_percentage = ""
+                        Plustwo_stream = ""
                         plus_one_percentage = ""
                         pg_stream = academic.get("stream", "")
                         twelfth_percentage = academic.get("12th_percentage", "")
@@ -1027,6 +1039,7 @@ elif st.session_state.page == "summary":
                         category_label,
                         board,
                         tenth_percentage,
+                        Plustwo_stream,
                         plus_one_percentage,
                         pg_stream,
                         twelfth_percentage,
