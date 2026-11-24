@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 import sqlite3
 import json
 import re
@@ -8,6 +7,11 @@ from pathlib import Path
 from datetime import date
 from PIL import Image, ImageDraw
 from io import BytesIO
+import gspread
+import uuid
+from google.oauth2.service_account import Credentials
+from datetime import datetime
+from zoneinfo import ZoneInfo
 # ==========================================
 # PAGE CONFIGURATION
 # ==========================================
@@ -151,6 +155,35 @@ def create_database():
 
 
 create_database()
+
+
+# ==========================================
+# GOOGLE SHEETS CONNECTION
+# ==========================================
+
+def get_google_sheet():
+    credentials_info = json.loads(
+        st.secrets["gcp_service_account"]
+    )
+
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
+    credentials = Credentials.from_service_account_info(
+        credentials_info,
+        scopes=scopes
+    )
+
+    client = gspread.authorize(credentials)
+
+    spreadsheet = client.open_by_key(
+        "1Zmt_kluAlR_JTBUvJ3XWsiVntWv_iVZUzuANv8CPJf4"
+    )
+
+    return spreadsheet.sheet1
+
 
 
 
@@ -946,83 +979,109 @@ elif st.session_state.page == "summary":
 
             else:
 
-                # SAVE APPLICATION INTO SQLITE DATABASE
-                with sqlite3.connect(DB_FILE) as conn:
-
-                    cursor = conn.cursor()
-
-                    cursor.execute("""
-                        INSERT INTO applications (
-    student_name,
-    applicant_name,
-    email,
-    phone,
-    category,
-    application_data,
-    submitted_at
-)
-VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                    """, (
-                        p["name"],
-                        p["name"],
-                        p["email"],
-                        p["phone"],
-                        a["category"],
-                        json.dumps({
-                            "personal": {
-                                **p,
-                                "dob": str(p["dob"])
-                            },
-                            "academic": a
-                        })
-                    ))
-
-                    
                 # SAVE APPLICATION TO GOOGLE SHEETS
-
-                p = st.session_state.personal
-                a = st.session_state.academic
-
-                is_ug = a["category"] == "UG"
-
-                payload = {
-                    "name": p.get("name", ""),
-                    "gender": p.get("gender", ""),
-                    "dob": str(p.get("dob", "")),
-                    "address": p.get("address", ""),
-                    "contact": p.get("phone", ""),
-                    "guardian_name": p.get("guardian", ""),
-                    "guardian_phone": p.get("guardian_phone", ""),
-                    "email": p.get("email", ""),
-                    "category": a.get("category", ""),
-                    "tenth_board": a.get("board", ""),
-                    "tenth_percentage": a.get("10th_percentage", ""),
-                    "plus_one_percentage": a.get("plus_one_percentage", ""),
-                    "ug_preferences": a.get("preferences", []) if is_ug else [],
-                    "twelfth_stream": a.get("stream", ""),
-                    "twelfth_percentage": a.get("12th_percentage", ""),
-                    "current_degree": a.get("degree_category", ""),
-                    "degree_details": a.get("degree_course", ""),
-                    "pg_preferences": a.get("preferences", []) if not is_ug else []
-                }
-
                 try:
-                    response = requests.post(
-                        st.secrets["GOOGLE_SCRIPT_URL"],
-                        json=payload,
-                        timeout=15
+                    application_id = "BCM" + uuid.uuid4().hex[:8].upper()
+
+                    personal = p
+                    academic = a
+
+                    category_label = (
+                        "Undergraduate (UG)"
+                        if academic["category"] == "UG"
+                        else "Postgraduate (PG)"
                     )
 
-                    response.raise_for_status()
-                    result = response.json()
+                    preferences = academic.get("preferences", [])[:5]
+                    preferences = preferences + [""] * (5 - len(preferences))
 
-                    if result.get("status") != "success":
-                        raise Exception("Google Sheets rejected the submission.")
+                    if academic["category"] == "UG":
+                        board = academic.get("board", "")
+                        tenth_percentage = academic.get("10th_percentage", "")
+                        plus_one_percentage = academic.get("plus_one_percentage", "")
+                        pg_stream = ""
+                        twelfth_percentage = ""
+                        degree_category = ""
+                        degree_course = ""
+                    else:
+                        board = ""
+                        tenth_percentage = ""
+                        plus_one_percentage = ""
+                        pg_stream = academic.get("stream", "")
+                        twelfth_percentage = academic.get("12th_percentage", "")
+                        degree_category = academic.get("degree_category", "")
+                        degree_course = academic.get("degree_course", "")
 
+                    submitted_at = datetime.now(
+                        ZoneInfo("Asia/Kolkata")
+                    ).strftime("%d-%m-%Y %I:%M %p")
+
+                    row = [
+                        application_id,
+                        personal.get("name", ""),
+                        str(personal.get("dob", "")),
+                        personal.get("gender", ""),
+                        personal.get("address", ""),
+                        personal.get("phone", ""),
+                        personal.get("email", ""),
+                        personal.get("guardian", ""),
+                        personal.get("guardian_phone", ""),
+                        category_label,
+                        board,
+                        tenth_percentage,
+                        plus_one_percentage,
+                        pg_stream,
+                        twelfth_percentage,
+                        degree_category,
+                        degree_course,
+                        *preferences,
+                        submitted_at,
+                        "Submitted"
+                    ]
+
+                    worksheet = get_google_sheet()
+                    worksheet.append_row(
+                        row,
+                        value_input_option="USER_ENTERED"
+                    )
+
+                    # Keep a local SQLite backup as well
+                    with sqlite3.connect(DB_FILE) as conn:
+                        conn.execute(
+                            """
+                            INSERT INTO applications (
+                                student_name,
+                                applicant_name,
+                                email,
+                                phone,
+                                category,
+                                application_data,
+                                submitted_at
+                            )
+                            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                            """,
+                            (
+                                personal.get("name", ""),
+                                personal.get("name", ""),
+                                personal.get("email", ""),
+                                personal.get("phone", ""),
+                                academic.get("category", ""),
+                                json.dumps({
+                                    "personal": {
+                                        **personal,
+                                        "dob": str(personal.get("dob", ""))
+                                    },
+                                    "academic": academic
+                                })
+                            )
+                        )
+
+                    st.session_state.application_id = application_id
                     st.session_state.sheets_saved = True
 
-                except Exception:
-                    st.session_state.sheets_saved = False
+                except Exception as e:
+                    st.error(f"Unable to save application to Google Sheets: {e}")
+                    st.stop()
 
                 # MOVE TO SUCCESS PAGE
                 st.session_state.page = "success"
