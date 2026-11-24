@@ -8,7 +8,6 @@ from datetime import date
 from PIL import Image, ImageDraw
 from io import BytesIO
 import gspread
-import uuid
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -981,7 +980,7 @@ elif st.session_state.page == "summary":
 
                 # SAVE APPLICATION TO GOOGLE SHEETS
                 try:
-                    application_id = "BCM" + uuid.uuid4().hex[:8].upper()
+                  
 
                     personal = p
                     academic = a
@@ -1017,7 +1016,6 @@ elif st.session_state.page == "summary":
                     ).strftime("%d-%m-%Y %I:%M %p")
 
                     row = [
-                        application_id,
                         personal.get("name", ""),
                         str(personal.get("dob", "")),
                         personal.get("gender", ""),
@@ -1076,7 +1074,7 @@ elif st.session_state.page == "summary":
                             )
                         )
 
-                    st.session_state.application_id = application_id
+                    
                     st.session_state.sheets_saved = True
 
                 except Exception as e:
