@@ -706,7 +706,7 @@ if st.session_state.page == "academic":
             ],
             key="degree_category"
         )
-       st.text_input(
+        st.text_input(
             "What degree programme are you currently pursuing or have completed? *",
             key="degree_course",
             placeholder="Enter the degree programme"
