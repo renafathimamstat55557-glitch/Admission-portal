@@ -840,21 +840,21 @@ if st.session_state.page == "academic":
         st.markdown("### Preferred Master's Degree Courses")
         preferences = show_preferences("pg", PG_COURSES)
 
-
     # --------------------------------------
     # SINGLE NEXT BUTTON FOR UG AND PG
     # --------------------------------------
-
+    
     if st.button("Next →", key="academic_next"):
-
-       if category == "Undergraduate (UG)":
-
+    
+        # UNDERGRADUATE VALIDATION
+        if category == "Undergraduate (UG)":
+    
             if not major1_preferences:
-        
+    
                 st.error("Please select at least one Major 1 course.")
-        
+    
             else:
-
+    
                 st.session_state.academic = {
                     "category": "UG",
                     "board": st.session_state.ug_board,
@@ -865,21 +865,23 @@ if st.session_state.page == "academic":
                     "major2_preferences": major2_preferences,
                     "training_programmes": st.session_state.ug_training_programmes
                 }
+    
                 st.session_state.page = "summary"
                 st.rerun()
-
-    else:
-
+    
+        # POSTGRADUATE VALIDATION
+        elif category == "Postgraduate (PG)":
+    
             if not st.session_state.degree_course.strip():
-
+    
                 st.error("Please enter your degree programme.")
-
+    
             elif not preferences:
-
+    
                 st.error("Please select at least one Master's course.")
-
+    
             else:
-
+    
                 st.session_state.academic = {
                     "category": "PG",
                     "stream": st.session_state.pg_stream,
@@ -889,10 +891,10 @@ if st.session_state.page == "academic":
                     "preferences": preferences,
                     "training_programmes": st.session_state.pg_training_programmes
                 }
-
+    
                 st.session_state.page = "summary"
                 st.rerun()
-
+   
 # ==========================================
 # APPLICATION SUMMARY PAGE
 # ==========================================
