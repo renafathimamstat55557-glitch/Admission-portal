@@ -1329,23 +1329,28 @@ if st.session_state.page == "success":
 # ==========================================
 # FOOTER
 # ==========================================
+# ==========================================
+# FOOTER
+# ==========================================
 
 st.markdown("""
 <div class="footer-text">
 
     B.C.M. College Kottayam (Autonomous)
+
     <br>
+
     Student Registration Portal
 
     <br><br>
 
-    <b>For Admission Enquiries, Contact:</b>
+    <strong>For Admission Enquiries, Contact:</strong>
 
     <br><br>
 
     👤 Ms. Anjali Thomas: +91 98765 43210
 
-    <br>
+    <br><br>
 
     👤 Mr. Rahul Mathew: +91 98765 12345
 
