@@ -91,6 +91,16 @@ STREAMS = [
     "Other"
 ]
 
+RESIDENTIAL_PROGRAMMES = [
+    "BCM Civil Services Academy",
+    "SSC, PSC, RRB and Banking Examinations",
+    "ACCA",
+    "Chartered Accountancy (CA – India)",
+    "BCM Defence Academy (Uniformed Services)",
+    "Soft Skills for Professionals",
+    "NET/JRF Coaching"
+]
+
 
 
 
@@ -242,11 +252,12 @@ DEFAULTS = {
     "ug_percentage": PERCENTAGES[0],
     "ug_stream": STREAMS[0],
     "ug_plus_one": 0.0,
-
+    "ug_training_programmes": [],
     "pg_stream": STREAMS[0],
     "pg_percentage": PERCENTAGES[0],
     "degree_category": "Science",
     "degree_course": ""
+    "pg_training_programmes": []
 }
 
 for key, value in DEFAULTS.items():
@@ -723,11 +734,26 @@ if st.session_state.page == "academic":
             key="ug_stream"
         )
         st.number_input(
-            "Plus One Percentage *",
+            "Plus One Percentage ",
             min_value=0.0,
             max_value=100.0,
             step=0.1,
             key="ug_plus_one"
+        )
+        
+        st.markdown("### Residential Training Programmes")
+
+        st.write(
+            "Would you be interested in enrolling in any of the "
+            "following Residential Training Programmes offered by BCM College?"
+        )
+        st.caption("Optional – You may select up to three programmes.")
+
+        ug_training_programmes = st.multiselect(
+            "Select your preferred programme(s)",
+            RESIDENTIAL_PROGRAMMES,
+            max_selections=3,
+            key="ug_training_programmes"
         )
 
         st.markdown("### UG Course Preferences")
@@ -772,7 +798,24 @@ if st.session_state.page == "academic":
             key="degree_course",
             placeholder="Enter the degree programme (Major/Main)"
         )
+        
+        st.markdown("### Residential Training Programmes")
 
+        st.write(
+            "Would you be interested in enrolling in any of the "
+            "following Residential Training Programmes offered by BCM College?"
+        )
+        st.caption("Optional – You may select up to three programmes.")
+
+        pg_training_programmes = st.multiselect(
+            "Select your preferred programme(s)",
+            RESIDENTIAL_PROGRAMMES,
+            max_selections=3,
+            key="pg_training_programmes"
+        )
+
+
+        
         st.markdown("### Preferred Master's Degree Courses")
         preferences = show_preferences("pg", PG_COURSES)
 
