@@ -749,7 +749,7 @@ if st.session_state.page == "academic":
         )
 
         ug_training_programmes = st.multiselect(
-            "Select your preferred programme(s)",
+            "Select your preferred programme",
             RESIDENTIAL_PROGRAMMES,
             max_selections=3,
             key="ug_training_programmes"
@@ -807,7 +807,7 @@ if st.session_state.page == "academic":
    
 
         pg_training_programmes = st.multiselect(
-            "Select your preferred programme(s)",
+            "Select your preferred programme",
             RESIDENTIAL_PROGRAMMES,
             max_selections=3,
             key="pg_training_programmes"
