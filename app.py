@@ -1060,27 +1060,25 @@ elif st.session_state.page == "summary":
 # BACK AND SUBMIT BUTTONS
 # --------------------------------------
 
-submit = st.columns(1)
+if st.button(
+    "✅ SAVE AND SUBMIT",
+    use_container_width=True
+):
 
-with submit[0]:
-    if st.button(
-        "✅ SAVE AND SUBMIT",
-        use_container_width=True
-    ):
+    # Get application details directly from session state
+    personal = st.session_state.get("personal", {})
+    academic = st.session_state.get("academic", {})
 
-        if not p or not a:
+    if not personal or not academic:
 
-            st.error(
-                "Please complete all application details."
-            )
+        st.error(
+            "Please complete all application details."
+        )
 
-        else:
+    else:
 
-            # SAVE APPLICATION TO GOOGLE SHEETS
-            try:
-
-                personal = p
-                academic = a
+        # SAVE APPLICATION TO GOOGLE SHEETS
+        try:
 
                 category_label = (
                     "Undergraduate (UG)"
