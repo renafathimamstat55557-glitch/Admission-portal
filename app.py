@@ -40,7 +40,6 @@ UG_COURSES = [
     "B.A. (Hons) Economics",
     "B.A. (Hons) Sociology",
     "B.A. (Hons) History",
-    "B.Sc. (Hons) Statistics",
     "B.Sc. (Hons) Mathematics",
     "B.Sc. (Hons) Computer Science",
     "B.Sc. (Hons) Home Science",
@@ -943,7 +942,17 @@ elif st.session_state.page == "summary":
             f"**Plus One Percentage:** "
             f"{a.get('plus_one_percentage', '')}%"
         )
+                st.subheader("Residential Training Programmes")
 
+        selected_programmes = a.get("training_programmes", [])
+
+        if selected_programmes:
+            for programme in selected_programmes:
+                st.write(f"• {programme}")
+        else:
+            st.write("No programmes selected.")
+
+        
         st.subheader("UG Course Preferences")
 
         for i, course in enumerate(
@@ -974,7 +983,18 @@ elif st.session_state.page == "summary":
             f"**Degree Course:** "
             f"{a.get('degree_course', '')}"
         )
+        
 
+        st.subheader("Residential Training Programmes")
+
+        selected_programmes = a.get("training_programmes", [])
+
+        if selected_programmes:
+            for programme in selected_programmes:
+                st.write(f"• {programme}")
+        else:
+            st.write("No programmes selected.")
+            
         st.subheader("PG Course Preferences")
 
         for i, course in enumerate(
@@ -1066,7 +1086,9 @@ elif st.session_state.page == "summary":
                         twelfth_percentage = academic.get("12th_percentage", "")
                         degree_category = academic.get("degree_category", "")
                         degree_course = academic.get("degree_course", "")
-
+                        training_programmes = ", ".join(
+                            academic.get("training_programmes", [])
+                        )
                     submitted_at = datetime.now(
                         ZoneInfo("Asia/Kolkata")
                     ).strftime("%d-%m-%Y %I:%M %p")
@@ -1089,6 +1111,7 @@ elif st.session_state.page == "summary":
                         twelfth_percentage,
                         degree_category,
                         degree_course,
+                        training_programmes,
                         *preferences,
                         submitted_at,
                         "Submitted"
