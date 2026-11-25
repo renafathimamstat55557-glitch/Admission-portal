@@ -1359,7 +1359,7 @@ with st.container(border=True):
     )
 
     st.write("")
-        st.markdown(
+    st.markdown(
         "<div style='text-align:center;'>"
         "**B.C.M. College Kottayam (Autonomous)**"
         "</div>",
