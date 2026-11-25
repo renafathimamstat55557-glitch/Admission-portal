@@ -1334,21 +1334,6 @@ st.divider()
 
 with st.container(border=True):
 
-    st.markdown(
-        "<div style='text-align:center;'>"
-        "**B.C.M. College Kottayam (Autonomous)**"
-        "</div>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "<div style='text-align:center;'>"
-        "Student Registration Portal"
-        "</div>",
-        unsafe_allow_html=True
-    )
-
-    st.write("")
 
     st.markdown(
         "<div style='text-align:center;'>"
@@ -1374,5 +1359,21 @@ with st.container(border=True):
     )
 
     st.write("")
+        st.markdown(
+        "<div style='text-align:center;'>"
+        "**B.C.M. College Kottayam (Autonomous)**"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "Student Registration Portal"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    st.write("")
+
 
     
