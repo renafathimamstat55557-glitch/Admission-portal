@@ -22,7 +22,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ==========================================
+st.markdown("""
+<style>
+    [data-testid="stStatusWidget"] {
+        display: none;
+    }
+
+    .viewerBadge_container__1QSob {
+        display: none;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # FILE PATHS
 # ==========================================
 
