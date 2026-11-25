@@ -1375,6 +1375,4 @@ with st.container(border=True):
 
     st.write("")
 
-    st.caption(
-        "© 2027 B.C.M. College Kottayam (Autonomous)"
-    )
+    
