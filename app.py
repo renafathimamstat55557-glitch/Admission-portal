@@ -843,7 +843,8 @@ if st.session_state.page == "academic":
                     "10th_percentage": st.session_state.ug_percentage,
                     "current_stream": st.session_state.ug_stream,
                     "plus_one_percentage": st.session_state.ug_plus_one,
-                    "preferences": preferences
+                    "preferences": preferences,
+                    "training_programmes": st.session_state.ug_training_programmes
                 }
                 st.session_state.page = "summary"
                 st.rerun()
@@ -866,7 +867,8 @@ if st.session_state.page == "academic":
                     "12th_percentage": st.session_state.pg_percentage,
                     "degree_category": st.session_state.degree_category,
                     "degree_course": st.session_state.degree_course.strip(),
-                    "preferences": preferences
+                    "preferences": preferences,
+                    "training_programmes": st.session_state.pg_training_programmes
                 }
 
                 st.session_state.page = "summary"
