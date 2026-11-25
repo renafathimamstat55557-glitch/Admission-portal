@@ -253,11 +253,12 @@ DEFAULTS = {
     "ug_stream": STREAMS[0],
     "ug_plus_one": 0.0,
     "ug_training_programmes": [],
+    "pg_training_programmes": [],
     "pg_stream": STREAMS[0],
     "pg_percentage": PERCENTAGES[0],
     "degree_category": "Science",
     "degree_course": ""
-    "pg_training_programmes": []
+   
 }
 
 for key, value in DEFAULTS.items():
