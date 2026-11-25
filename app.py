@@ -1330,10 +1330,6 @@ if st.session_state.page == "success":
 # FOOTER
 # ==========================================
 
-# ==========================================
-# FOOTER
-# ==========================================
-
 st.markdown("""
 <div class="footer-text">
 
@@ -1354,6 +1350,8 @@ st.markdown("""
     👤 Mr. Rahul Mathew: +91 98765 12345
 
     <br><br>
+
+    © 2027 B.C.M. College Kottayam (Autonomous)
 
 </div>
 """, unsafe_allow_html=True)
