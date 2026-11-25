@@ -41,6 +41,7 @@ UG_COURSES = [
     "B.A. (Hons) Sociology",
     "B.A. (Hons) History",
     "B.Sc. (Hons) Mathematics",
+    "B.Sc. (Hons) Statistics",
     "B.Sc. (Hons) Computer Science",
     "B.Sc. (Hons) Home Science",
     "B.Sc. (Hons) Food Science & Quality Control",
