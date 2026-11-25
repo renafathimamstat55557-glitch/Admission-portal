@@ -742,13 +742,11 @@ if st.session_state.page == "academic":
             key="ug_plus_one"
         )
         
-        st.markdown("### Residential Training Programmes")
 
         st.write(
             "Would you be interested in enrolling in any of the "
             "following Residential Training Programmes offered by BCM College?"
         )
-        st.caption("Optional – You may select up to three programmes.")
 
         ug_training_programmes = st.multiselect(
             "Select your preferred programme(s)",
@@ -800,13 +798,13 @@ if st.session_state.page == "academic":
             placeholder="Enter the degree programme (Major/Main)"
         )
         
-        st.markdown("### Residential Training Programmes")
+      
 
         st.write(
             "Would you be interested in enrolling in any of the "
             "following Residential Training Programmes offered by BCM College?"
         )
-        st.caption("Optional – You may select up to three programmes.")
+   
 
         pg_training_programmes = st.multiselect(
             "Select your preferred programme(s)",
