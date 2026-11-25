@@ -942,7 +942,7 @@ elif st.session_state.page == "summary":
             f"**Plus One Percentage:** "
             f"{a.get('plus_one_percentage', '')}%"
         )
-                st.subheader("Residential Training Programmes")
+        st.subheader("Residential Training Programmes")
 
         selected_programmes = a.get("training_programmes", [])
 
