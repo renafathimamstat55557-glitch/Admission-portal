@@ -1069,190 +1069,191 @@ elif st.session_state.page == "summary":
 # BACK AND SUBMIT BUTTONS
 # --------------------------------------
 
-if st.button(
-    "✅ SAVE AND SUBMIT",
-    use_container_width=True
-):
+if st.session_state.page == "summary":
 
-    personal = st.session_state.get("personal", {})
-    academic = st.session_state.get("academic", {})
-
-    if not personal or not academic:
-        st.error("Please complete all application details.")
-
-    else:
-
-        try:
-
-            category_label = (
-                "Undergraduate (UG)"
-                if academic["category"] == "UG"
-                else "Postgraduate (PG)"
-            )
-
-            # UG Major 1 preferences
-            ug_major1_preferences = academic.get(
-                "major1_preferences", []
-            )[:5]
-
-            ug_major1_preferences += [""] * (
-                5 - len(ug_major1_preferences)
-            )
-
-            # UG Major 2 preferences
-            ug_major2_preferences = academic.get(
-                "major2_preferences", []
-            )[:5]
-
-            ug_major2_preferences += [""] * (
-                5 - len(ug_major2_preferences)
-            )
-
-            # PG preferences
-            pg_preferences = academic.get(
-                "preferences", []
-            )[:5]
-
-            pg_preferences += [""] * (
-                5 - len(pg_preferences)
-            )
-
-            # Separate UG and PG data
-            if academic["category"] == "UG":
-
-                board = academic.get("board", "")
-                tenth_percentage = academic.get(
-                    "10th_percentage", ""
+    if st.button(
+        "✅ SAVE AND SUBMIT",
+        use_container_width=True
+    ):
+        personal = st.session_state.get("personal", {})
+        academic = st.session_state.get("academic", {})
+    
+        if not personal or not academic:
+            st.error("Please complete all application details.")
+    
+        else:
+    
+            try:
+    
+                category_label = (
+                    "Undergraduate (UG)"
+                    if academic["category"] == "UG"
+                    else "Postgraduate (PG)"
                 )
-                Plustwo_stream = academic.get(
-                    "current_stream", ""
+    
+                # UG Major 1 preferences
+                ug_major1_preferences = academic.get(
+                    "major1_preferences", []
+                )[:5]
+    
+                ug_major1_preferences += [""] * (
+                    5 - len(ug_major1_preferences)
                 )
-                plus_one_percentage = academic.get(
-                    "plus_one_percentage", ""
+    
+                # UG Major 2 preferences
+                ug_major2_preferences = academic.get(
+                    "major2_preferences", []
+                )[:5]
+    
+                ug_major2_preferences += [""] * (
+                    5 - len(ug_major2_preferences)
                 )
-
-                pg_stream = ""
-                twelfth_percentage = ""
-                degree_category = ""
-                degree_course = ""
-
-                pg_preferences = [""] * 5
-
-            else:
-
-                board = ""
-                tenth_percentage = ""
-                Plustwo_stream = ""
-                plus_one_percentage = ""
-
-                pg_stream = academic.get("stream", "")
-                twelfth_percentage = academic.get(
-                    "12th_percentage", ""
+    
+                # PG preferences
+                pg_preferences = academic.get(
+                    "preferences", []
+                )[:5]
+    
+                pg_preferences += [""] * (
+                    5 - len(pg_preferences)
                 )
-                degree_category = academic.get(
-                    "degree_category", ""
-                )
-                degree_course = academic.get(
-                    "degree_course", ""
-                )
-
-                ug_major1_preferences = [""] * 5
-                ug_major2_preferences = [""] * 5
-
-            # Residential training programmes
-            training_programmes = ", ".join(
-                academic.get("training_programmes", [])
-            )
-
-            # Submission date and time
-            submitted_at = datetime.now(
-                ZoneInfo("Asia/Kolkata")
-            ).strftime("%d-%m-%Y %I:%M %p")
-
-            # Prepare Google Sheets row
-            row = [
-
-                personal.get("name", ""),
-                str(personal.get("dob", "")),
-                personal.get("gender", ""),
-                personal.get("address", ""),
-                personal.get("phone", ""),
-                personal.get("email", ""),
-                personal.get("guardian", ""),
-                personal.get("guardian_phone", ""),
-
-                category_label,
-
-                board,
-                tenth_percentage,
-                Plustwo_stream,
-                plus_one_percentage,
-
-                pg_stream,
-                twelfth_percentage,
-                degree_category,
-                degree_course,
-
-                training_programmes,
-
-                *ug_major1_preferences,
-                *ug_major2_preferences,
-                *pg_preferences,
-
-                submitted_at,
-                "Submitted"
-            ]
-
-            # Save to Google Sheets
-            worksheet = get_google_sheet()
-
-            worksheet.append_row(
-                row,
-                value_input_option="USER_ENTERED"
-            )
-
-            # Save local SQLite backup
-            with sqlite3.connect(DB_FILE) as conn:
-
-                conn.execute(
-                    """
-                    INSERT INTO applications (
-                        student_name,
-                        applicant_name,
-                        email,
-                        phone,
-                        category,
-                        application_data,
-                        submitted_at
+    
+                # Separate UG and PG data
+                if academic["category"] == "UG":
+    
+                    board = academic.get("board", "")
+                    tenth_percentage = academic.get(
+                        "10th_percentage", ""
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                    """,
-                    (
-                        personal.get("name", ""),
-                        personal.get("name", ""),
-                        personal.get("email", ""),
-                        personal.get("phone", ""),
-                        academic.get("category", ""),
-                        json.dumps({
-                            "personal": {
-                                **personal,
-                                "dob": str(
-                                    personal.get("dob", "")
-                                )
-                            },
-                            "academic": academic
-                        })
+                    Plustwo_stream = academic.get(
+                        "current_stream", ""
                     )
+                    plus_one_percentage = academic.get(
+                        "plus_one_percentage", ""
+                    )
+    
+                    pg_stream = ""
+                    twelfth_percentage = ""
+                    degree_category = ""
+                    degree_course = ""
+    
+                    pg_preferences = [""] * 5
+    
+                else:
+    
+                    board = ""
+                    tenth_percentage = ""
+                    Plustwo_stream = ""
+                    plus_one_percentage = ""
+    
+                    pg_stream = academic.get("stream", "")
+                    twelfth_percentage = academic.get(
+                        "12th_percentage", ""
+                    )
+                    degree_category = academic.get(
+                        "degree_category", ""
+                    )
+                    degree_course = academic.get(
+                        "degree_course", ""
+                    )
+    
+                    ug_major1_preferences = [""] * 5
+                    ug_major2_preferences = [""] * 5
+    
+                # Residential training programmes
+                training_programmes = ", ".join(
+                    academic.get("training_programmes", [])
                 )
-
-            st.session_state.sheets_saved = True
-
-        except Exception as e:
-
-            st.error(
-                f"Unable to save application: {e}"
-            )
-            st.stop()
+    
+                # Submission date and time
+                submitted_at = datetime.now(
+                    ZoneInfo("Asia/Kolkata")
+                ).strftime("%d-%m-%Y %I:%M %p")
+    
+                # Prepare Google Sheets row
+                row = [
+    
+                    personal.get("name", ""),
+                    str(personal.get("dob", "")),
+                    personal.get("gender", ""),
+                    personal.get("address", ""),
+                    personal.get("phone", ""),
+                    personal.get("email", ""),
+                    personal.get("guardian", ""),
+                    personal.get("guardian_phone", ""),
+    
+                    category_label,
+    
+                    board,
+                    tenth_percentage,
+                    Plustwo_stream,
+                    plus_one_percentage,
+    
+                    pg_stream,
+                    twelfth_percentage,
+                    degree_category,
+                    degree_course,
+    
+                    training_programmes,
+    
+                    *ug_major1_preferences,
+                    *ug_major2_preferences,
+                    *pg_preferences,
+    
+                    submitted_at,
+                    "Submitted"
+                ]
+    
+                # Save to Google Sheets
+                worksheet = get_google_sheet()
+    
+                worksheet.append_row(
+                    row,
+                    value_input_option="USER_ENTERED"
+                )
+    
+                # Save local SQLite backup
+                with sqlite3.connect(DB_FILE) as conn:
+    
+                    conn.execute(
+                        """
+                        INSERT INTO applications (
+                            student_name,
+                            applicant_name,
+                            email,
+                            phone,
+                            category,
+                            application_data,
+                            submitted_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                        """,
+                        (
+                            personal.get("name", ""),
+                            personal.get("name", ""),
+                            personal.get("email", ""),
+                            personal.get("phone", ""),
+                            academic.get("category", ""),
+                            json.dumps({
+                                "personal": {
+                                    **personal,
+                                    "dob": str(
+                                        personal.get("dob", "")
+                                    )
+                                },
+                                "academic": academic
+                            })
+                        )
+                    )
+    
+                st.session_state.sheets_saved = True
+    
+            except Exception as e:
+    
+                st.error(
+                    f"Unable to save application: {e}"
+                )
+                st.stop()
 
         # Move to success page
         st.session_state.page = "success"
