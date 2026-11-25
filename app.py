@@ -867,7 +867,7 @@ if st.session_state.page == "academic":
                 st.session_state.page = "summary"
                 st.rerun()
 
-        else:
+    else:
 
             if not st.session_state.degree_course.strip():
 
