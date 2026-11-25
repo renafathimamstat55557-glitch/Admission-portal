@@ -1278,12 +1278,12 @@ if st.button(
 
                 st.session_state.sheets_saved = True
 
-            except Exception as e:
-
-                st.error(
-                    f"Unable to save application to Google Sheets: {e}"
-                )
-                st.stop()
+               except Exception as e:
+        
+                    st.error(
+                        f"Unable to save application to Google Sheets: {e}"
+                    )
+                    st.stop()
 
             # --------------------------------------
             # MOVE TO SUCCESS PAGE
