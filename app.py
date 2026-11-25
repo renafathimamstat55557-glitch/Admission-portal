@@ -652,18 +652,26 @@ elif st.session_state.page == "personal":
 # COURSE PREFERENCE FUNCTION
 # ==========================================
 
-def show_preferences(prefix, courses):
+def show_preferences(prefix, courses, exclude_courses=None, section_name="Course"):
 
     selected = []
 
-    options = ["Not selected"] + courses
+    # Courses that should not appear in this section
+    excluded = set(exclude_courses or [])
+
+    # Remove excluded courses
+    available_courses = [
+        course for course in courses
+        if course not in excluded
+    ]
 
     for i in range(1, 6):
 
         key = f"{prefix}pref{i}"
 
+        # Prevent duplicate selections within this section
         available = [
-            course for course in courses
+            course for course in available_courses
             if course not in selected
         ]
 
@@ -673,11 +681,12 @@ def show_preferences(prefix, courses):
             key, "Not selected"
         )
 
+        # Reset selection if it is no longer available
         if current_value not in current_options:
             st.session_state[key] = "Not selected"
 
         choice = st.selectbox(
-            f"Preference {i}",
+            f"{section_name} Preference {i}",
             current_options,
             key=key
         )
@@ -754,11 +763,24 @@ if st.session_state.page == "academic":
             key="ug_training_programmes"
         )
 
-        st.markdown("### UG Course Preferences")
-
+        st.markdown("### Major 1 Course Preferences")
         st.write("Choose up to five courses in your preferred order.")
-
-        preferences = show_preferences("ug", UG_COURSES)
+        
+        major1_preferences = show_preferences(
+            "ug_major1",
+            UG_COURSES,
+            section_name="Major 1"
+        )
+        
+        st.markdown("### Major 2 Course Preferences")
+        st.write("Optional: Choose up to five additional courses.")
+        
+        major2_preferences = show_preferences(
+            "ug_major2",
+            UG_COURSES,
+            exclude_courses=major1_preferences,
+            section_name="Major 2"
+        )
 
     # --------------------------------------
     # PG FORM
@@ -842,7 +864,8 @@ if st.session_state.page == "academic":
                     "10th_percentage": st.session_state.ug_percentage,
                     "current_stream": st.session_state.ug_stream,
                     "plus_one_percentage": st.session_state.ug_plus_one,
-                    "preferences": preferences,
+                    "major1_preferences": major1_preferences,
+                    "major2_preferences": major2_preferences,
                     "training_programmes": st.session_state.ug_training_programmes
                 }
                 st.session_state.page = "summary"
@@ -1033,142 +1056,246 @@ elif st.session_state.page == "summary":
 
     st.divider()
 
-    # --------------------------------------
-    # BACK AND SUBMIT BUTTONS
-    # --------------------------------------
+# --------------------------------------
+# BACK AND SUBMIT BUTTONS
+# --------------------------------------
 
-    submit = st.columns(1)
-    with submit[0]:
-        if st.button(
-            "✅ SAVE AND SUBMIT",
-            use_container_width=True
-        ):
+submit = st.columns(1)
 
-            if not p or not a:
+with submit[0]:
+    if st.button(
+        "✅ SAVE AND SUBMIT",
+        use_container_width=True
+    ):
 
-                st.error(
-                    "Please complete all application details."
+        if not p or not a:
+
+            st.error(
+                "Please complete all application details."
+            )
+
+        else:
+
+            # SAVE APPLICATION TO GOOGLE SHEETS
+            try:
+
+                personal = p
+                academic = a
+
+                category_label = (
+                    "Undergraduate (UG)"
+                    if academic["category"] == "UG"
+                    else "Postgraduate (PG)"
                 )
 
-            else:
+                # --------------------------------------
+                # PREPARE UG MAJOR 1 PREFERENCES
+                # --------------------------------------
 
-                # SAVE APPLICATION TO GOOGLE SHEETS
-                try:
-                  
+                ug_major1_preferences = academic.get(
+                    "major1_preferences", []
+                )[:5]
 
-                    personal = p
-                    academic = a
+                ug_major1_preferences += [""] * (
+                    5 - len(ug_major1_preferences)
+                )
 
-                    category_label = (
-                        "Undergraduate (UG)"
-                        if academic["category"] == "UG"
-                        else "Postgraduate (PG)"
+                # --------------------------------------
+                # PREPARE UG MAJOR 2 PREFERENCES
+                # --------------------------------------
+
+                ug_major2_preferences = academic.get(
+                    "major2_preferences", []
+                )[:5]
+
+                ug_major2_preferences += [""] * (
+                    5 - len(ug_major2_preferences)
+                )
+
+                # --------------------------------------
+                # PREPARE PG PREFERENCES
+                # --------------------------------------
+
+                pg_preferences = academic.get(
+                    "preferences", []
+                )[:5]
+
+                pg_preferences += [""] * (
+                    5 - len(pg_preferences)
+                )
+
+                # --------------------------------------
+                # SEPARATE UG AND PG DATA
+                # --------------------------------------
+
+                if academic["category"] == "UG":
+
+                    board = academic.get("board", "")
+                    tenth_percentage = academic.get(
+                        "10th_percentage", ""
+                    )
+                    Plustwo_stream = academic.get(
+                        "current_stream", ""
+                    )
+                    plus_one_percentage = academic.get(
+                        "plus_one_percentage", ""
                     )
 
-                    preferences = academic.get("preferences", [])[:5]
-                    preferences = preferences + [""] * (5 - len(preferences))
-                    training_programmes = ", ".join(
-                        academic.get("training_programmes", [])
+                    pg_stream = ""
+                    twelfth_percentage = ""
+                    degree_category = ""
+                    degree_course = ""
+
+                    # PG preference columns remain blank for UG
+                    pg_preferences = [""] * 5
+
+                else:
+
+                    board = ""
+                    tenth_percentage = ""
+                    Plustwo_stream = ""
+                    plus_one_percentage = ""
+
+                    pg_stream = academic.get("stream", "")
+                    twelfth_percentage = academic.get(
+                        "12th_percentage", ""
                     )
-                    if academic["category"] == "UG":
-                        board = academic.get("board", "")
-                        tenth_percentage = academic.get("10th_percentage", "")
-                        Plustwo_stream = academic.get("current_stream", "")
-                        plus_one_percentage = academic.get("plus_one_percentage", "")
-                        pg_stream = ""
-                        twelfth_percentage = ""
-                        degree_category = ""
-                        degree_course = ""
-                    else:
-                        board = ""
-                        tenth_percentage = ""
-                        Plustwo_stream = ""
-                        plus_one_percentage = ""
-                        pg_stream = academic.get("stream", "")
-                        twelfth_percentage = academic.get("12th_percentage", "")
-                        degree_category = academic.get("degree_category", "")
-                        degree_course = academic.get("degree_course", "")
-                       
-                    submitted_at = datetime.now(
-                        ZoneInfo("Asia/Kolkata")
-                    ).strftime("%d-%m-%Y %I:%M %p")
-
-                    row = [
-                        personal.get("name", ""),
-                        str(personal.get("dob", "")),
-                        personal.get("gender", ""),
-                        personal.get("address", ""),
-                        personal.get("phone", ""),
-                        personal.get("email", ""),
-                        personal.get("guardian", ""),
-                        personal.get("guardian_phone", ""),
-                        category_label,
-                        board,
-                        tenth_percentage,
-                        Plustwo_stream,
-                        plus_one_percentage,
-                        pg_stream,
-                        twelfth_percentage,
-                        degree_category,
-                        degree_course,
-                        training_programmes,
-                        *preferences,
-                        submitted_at,
-                        "Submitted"
-                    ]
-
-                    worksheet = get_google_sheet()
-                    worksheet.append_row(
-                        row,
-                        value_input_option="USER_ENTERED"
+                    degree_category = academic.get(
+                        "degree_category", ""
+                    )
+                    degree_course = academic.get(
+                        "degree_course", ""
                     )
 
-                    # Keep a local SQLite backup as well
-                    with sqlite3.connect(DB_FILE) as conn:
-                        conn.execute(
-                            """
-                            INSERT INTO applications (
-                                student_name,
-                                applicant_name,
-                                email,
-                                phone,
-                                category,
-                                application_data,
-                                submitted_at
-                            )
-                            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                            """,
-                            (
-                                personal.get("name", ""),
-                                personal.get("name", ""),
-                                personal.get("email", ""),
-                                personal.get("phone", ""),
-                                academic.get("category", ""),
-                                json.dumps({
-                                    "personal": {
-                                        **personal,
-                                        "dob": str(personal.get("dob", ""))
-                                    },
-                                    "academic": academic
-                                })
-                            )
+                    # UG preference columns remain blank for PG
+                    ug_major1_preferences = [""] * 5
+                    ug_major2_preferences = [""] * 5
+
+                # --------------------------------------
+                # RESIDENTIAL TRAINING PROGRAMMES
+                # --------------------------------------
+
+                training_programmes = ", ".join(
+                    academic.get("training_programmes", [])
+                )
+
+                # --------------------------------------
+                # SUBMISSION DATE AND TIME
+                # --------------------------------------
+
+                submitted_at = datetime.now(
+                    ZoneInfo("Asia/Kolkata")
+                ).strftime("%d-%m-%Y %I:%M %p")
+
+                # --------------------------------------
+                # GOOGLE SHEETS ROW
+                # --------------------------------------
+
+                row = [
+
+                    personal.get("name", ""),
+                    str(personal.get("dob", "")),
+                    personal.get("gender", ""),
+                    personal.get("address", ""),
+                    personal.get("phone", ""),
+                    personal.get("email", ""),
+                    personal.get("guardian", ""),
+                    personal.get("guardian_phone", ""),
+
+                    category_label,
+
+                    board,
+                    tenth_percentage,
+                    Plustwo_stream,
+                    plus_one_percentage,
+
+                    pg_stream,
+                    twelfth_percentage,
+                    degree_category,
+                    degree_course,
+
+                    training_programmes,
+
+                    # UG MAJOR 1 - FIVE COLUMNS
+                    *ug_major1_preferences,
+
+                    # UG MAJOR 2 - FIVE COLUMNS
+                    *ug_major2_preferences,
+
+                    # PG PREFERENCES - FIVE COLUMNS
+                    *pg_preferences,
+
+                    submitted_at,
+                    "Submitted"
+                ]
+
+                # --------------------------------------
+                # SAVE TO GOOGLE SHEETS
+                # --------------------------------------
+
+                worksheet = get_google_sheet()
+
+                worksheet.append_row(
+                    row,
+                    value_input_option="USER_ENTERED"
+                )
+
+                # --------------------------------------
+                # SAVE LOCAL SQLITE BACKUP
+                # --------------------------------------
+
+                with sqlite3.connect(DB_FILE) as conn:
+
+                    conn.execute(
+                        """
+                        INSERT INTO applications (
+                            student_name,
+                            applicant_name,
+                            email,
+                            phone,
+                            category,
+                            application_data,
+                            submitted_at
                         )
+                        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                        """,
+                        (
+                            personal.get("name", ""),
+                            personal.get("name", ""),
+                            personal.get("email", ""),
+                            personal.get("phone", ""),
+                            academic.get("category", ""),
+                            json.dumps({
+                                "personal": {
+                                    **personal,
+                                    "dob": str(
+                                        personal.get("dob", "")
+                                    )
+                                },
+                                "academic": academic
+                            })
+                        )
+                    )
 
-                    
-                    st.session_state.sheets_saved = True
+                st.session_state.sheets_saved = True
 
-                except Exception as e:
-                    st.error(f"Unable to save application to Google Sheets: {e}")
-                    st.stop()
+            except Exception as e:
 
-                # MOVE TO SUCCESS PAGE
-                st.session_state.page = "success"
-                st.rerun()
-              
-    
-   
+                st.error(
+                    f"Unable to save application to Google Sheets: {e}"
+                )
+                st.stop()
+
+            # --------------------------------------
+            # MOVE TO SUCCESS PAGE
+            # --------------------------------------
+
+            st.session_state.page = "success"
+            st.rerun()
+
 
 # ==========================================
+
 # SUCCESS PAGE
 # ==========================================
 
