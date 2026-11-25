@@ -24,13 +24,36 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    [data-testid="stStatusWidget"] {
-        display: none;
-    }
 
-    .viewerBadge_container__1QSob {
-        display: none;
-    }
+/* Hide Streamlit floating elements */
+#MainMenu {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+.stDeployButton {
+    display: none !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
