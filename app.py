@@ -1337,7 +1337,7 @@ with st.container(border=True):
 
     st.markdown(
         "<div style='text-align:center;'>"
-        "**For Admission Enquiries, Contact:**"
+        "For Enquiries:"
         "</div>",
         unsafe_allow_html=True
     )
@@ -1361,7 +1361,7 @@ with st.container(border=True):
     st.write("")
     st.markdown(
         "<div style='text-align:center;'>"
-        "**B.C.M. College Kottayam (Autonomous)**"
+        "B.C.M. College Kottayam (Autonomous)"
         "</div>",
         unsafe_allow_html=True
     )
