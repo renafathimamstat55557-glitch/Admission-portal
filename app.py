@@ -1067,7 +1067,9 @@ elif st.session_state.page == "summary":
 
                     preferences = academic.get("preferences", [])[:5]
                     preferences = preferences + [""] * (5 - len(preferences))
-
+                    training_programmes = ", ".join(
+                        academic.get("training_programmes", [])
+                    )
                     if academic["category"] == "UG":
                         board = academic.get("board", "")
                         tenth_percentage = academic.get("10th_percentage", "")
@@ -1086,9 +1088,7 @@ elif st.session_state.page == "summary":
                         twelfth_percentage = academic.get("12th_percentage", "")
                         degree_category = academic.get("degree_category", "")
                         degree_course = academic.get("degree_course", "")
-                        training_programmes = ", ".join(
-                            academic.get("training_programmes", [])
-                        )
+                       
                     submitted_at = datetime.now(
                         ZoneInfo("Asia/Kolkata")
                     ).strftime("%d-%m-%Y %I:%M %p")
