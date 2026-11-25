@@ -1329,34 +1329,52 @@ if st.session_state.page == "success":
 # ==========================================
 # FOOTER
 # ==========================================
-# ==========================================
-# FOOTER
-# ==========================================
 
-st.markdown("""
-<div class="footer-text">
+st.divider()
 
-    B.C.M. College Kottayam (Autonomous)
+with st.container(border=True):
 
-    <br>
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "**B.C.M. College Kottayam (Autonomous)**"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    Student Registration Portal
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "Student Registration Portal"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    <br><br>
+    st.write("")
 
-    <strong>For Admission Enquiries, Contact:</strong>
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "**For Admission Enquiries, Contact:**"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    <br><br>
+    st.write("")
 
-    👤 Ms. Anjali Thomas: +91 98765 43210
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "👤 Ms. Anjali Thomas: +91 98765 43210"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    <br><br>
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "👤 Mr. Rahul Mathew: +91 98765 12345"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    👤 Mr. Rahul Mathew: +91 98765 12345
+    st.write("")
 
-    <br><br>
-
-    © 2027 B.C.M. College Kottayam (Autonomous)
-
-</div>
-""", unsafe_allow_html=True)
+    st.caption(
+        "© 2027 B.C.M. College Kottayam (Autonomous)"
+    )
