@@ -1347,7 +1347,7 @@ with st.container(border=True):
 
     st.markdown(
         "<div style='text-align:center;'>"
-        " 0481 256 2171, +91 9496 801 986 "
+        "+91 9496 801 986 "
         "</div>",
         unsafe_allow_html=True
     )
