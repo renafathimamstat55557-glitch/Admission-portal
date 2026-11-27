@@ -1347,14 +1347,14 @@ with st.container(border=True):
 
     st.markdown(
         "<div style='text-align:center;'>"
-        "👤 Ms. Anjali Thomas: +91 98765 43210"
+        " 0481 256 2171, +91 9496 801 986 "
         "</div>",
         unsafe_allow_html=True
     )
 
     st.markdown(
         "<div style='text-align:center;'>"
-        "👤 Mr. Rahul Mathew: +91 98765 12345"
+        "+91 9188 944 099, +91  9961 988 101"
         "</div>",
         unsafe_allow_html=True
     )
