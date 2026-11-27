@@ -37,11 +37,11 @@ DB_FILE = BASE_DIR / "bcm_registrations.db"
 # ==========================================
 
 UG_COURSES = [
+    "B.Sc. (Hons) Statistics",
     "B.A. (Hons) English Language & Literature",
     "B.A. (Hons) Economics",
     "B.A. (Hons) Sociology",
     "B.A. (Hons) History",
-    "B.Sc. (Hons) Statistics",
     "B.Sc. (Hons) Mathematics",
     "B.Sc. (Hons) Computer Science",
     "B.Sc. (Hons) Home Science",
@@ -57,9 +57,9 @@ UG_COURSES = [
 ]
 
 PG_COURSES = [
+    "M.Sc. Statistics with Data Science",
     "M.A. English",
     "M.Sc. Mathematics",
-    "M.Sc. Statistics with Data Science",
     "M.Sc. Home Science (Child Development)",
     "M.Com. Finance and Taxation / Business Analytics",
     "Master of Social Work"
@@ -566,7 +566,7 @@ elif st.session_state.page == "personal":
         phone = st.text_input(
             "Contact Number / WhatsApp Number *",
             value=st.session_state.get("p_phone", ""),
-            placeholder="Enter 10-digit number"
+            placeholder="Enter a valid phone number"
         )
 
         email = st.text_input(
@@ -583,7 +583,7 @@ elif st.session_state.page == "personal":
         guardian_phone = st.text_input(
             "Guardian Mobile Number *",
             value=st.session_state.get("p_guardian_phone", ""),
-            placeholder="Enter 10-digit number"
+            placeholder="Enter a valid phone number"
         )
 
         next_button = st.form_submit_button(
