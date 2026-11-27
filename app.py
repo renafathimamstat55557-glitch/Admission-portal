@@ -38,10 +38,6 @@ DB_FILE = BASE_DIR / "bcm_registrations.db"
 
 UG_COURSES = [
     "B.Sc. (Hons) Statistics",
-    "B.A. (Hons) English Language & Literature",
-    "B.A. (Hons) Economics",
-    "B.A. (Hons) Sociology",
-    "B.A. (Hons) History",
     "B.Sc. (Hons) Mathematics",
     "B.Sc. (Hons) Computer Science",
     "B.Sc. (Hons) Home Science",
@@ -51,6 +47,10 @@ UG_COURSES = [
     "B.Sc. (Hons) Chemistry",
     "B.Sc. (Hons) Botany",
     "B.Sc. (Hons) Applied Psychology",
+    "B.A. (Hons) English Language & Literature",
+    "B.A. (Hons) Economics",
+    "B.A. (Hons) Sociology",
+    "B.A. (Hons) History",
     "B.Com. (Hons) ACCA",
     "B.Com. (Hons) CA",
     "B.Com. (Hons) Finance and Taxation"
@@ -58,9 +58,9 @@ UG_COURSES = [
 
 PG_COURSES = [
     "M.Sc. Statistics with Data Science",
-    "M.A. English",
     "M.Sc. Mathematics",
     "M.Sc. Home Science (Child Development)",
+    "M.A. English",
     "M.Com. Finance and Taxation / Business Analytics",
     "Master of Social Work"
 ]
